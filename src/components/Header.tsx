@@ -1,6 +1,7 @@
 
 import { Sparkles, Brain } from "lucide-react";
 import { ApiKeyDialog } from "./ApiKeyDialog";
+import { WalletConnectButton } from "./WalletConnectButton";
 import { useAureaAPI } from "@/hooks/useAureaAPI";
 
 export const Header = () => {
@@ -24,6 +25,7 @@ export const Header = () => {
       </div>
       
       <div className="flex items-center space-x-4">
+        <WalletConnectButton />
         <ApiKeyDialog onApiKeySet={handleApiKey} hasApiKey={!!apiKey} />
         <div className="hidden md:flex items-center space-x-2 px-3 py-1 bg-aurea-500/20 rounded-full border border-aurea-500/30">
           <div className={`w-2 h-2 rounded-full animate-pulse ${apiKey ? 'bg-green-400' : 'bg-yellow-400'}`}></div>

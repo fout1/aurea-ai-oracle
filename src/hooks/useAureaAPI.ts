@@ -8,11 +8,13 @@ import {
   ApiError 
 } from '@/types/aurea-api';
 import { useToast } from '@/hooks/use-toast';
+import { useWalletConnect } from '@/hooks/useWalletConnect';
 
 export const useAureaAPI = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [apiKey, setApiKey] = useState(aureaAPI.getApiKey());
   const { toast } = useToast();
+  const { wallet } = useWalletConnect();
 
   const handleApiKey = useCallback((key: string) => {
     aureaAPI.setApiKey(key);
@@ -39,13 +41,23 @@ export const useAureaAPI = () => {
     }
 
     setIsLoading(true);
-    console.log('Sending message to Aurea API:', { prompt, address, chainId });
+    
+    // Use wallet address if available, otherwise use provided address
+    const userAddress = wallet?.address || address || "0x0000000000000000000000000000000000000000";
+    const userChainId = chainId || wallet?.chainId?.toString();
+    
+    console.log('Sending message to Aurea API:', { 
+      prompt, 
+      address: userAddress, 
+      chainId: userChainId,
+      walletConnected: !!wallet 
+    });
 
     try {
       const result = await aureaAPI.chat({
         prompt,
-        address: address || "0x0000000000000000000000000000000000000000",
-        chainId,
+        address: userAddress,
+        chainId: userChainId,
         messages: conversationHistory,
       });
 
@@ -58,7 +70,18 @@ export const useAureaAPI = () => {
         // Transaction result
         const txResult = result.result as TransactionResult;
         return {
-          response: `Transaction prepared: ${txResult.data.description}\n\nSolver: ${txResult.solver}\nAction: ${txResult.action}\nGas Cost: ${txResult.data.gasCostUSD} USD`,
+          response: `🔄 **Transaction Prepared by Aurea AI**
+
+**Description:** ${txResult.data.description}
+
+**Details:**
+• Solver: ${txResult.solver}
+• Action: ${txResult.action}
+• Gas Cost: $${txResult.data.gasCostUSD}
+• From: ${txResult.data.fromAmount} ${txResult.data.fromToken.symbol} (~$${txResult.data.fromAmountUSD})
+• To: ${txResult.data.toAmount} ${txResult.data.toToken.symbol} (~$${txResult.data.toAmountUSD})
+
+${wallet ? `✅ Wallet connected: ${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}` : '⚠️ Connect wallet to execute transaction'}`,
           isTransaction: true,
         };
       } else {
@@ -80,7 +103,7 @@ export const useAureaAPI = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [apiKey, toast]);
+  }, [apiKey, wallet, toast]);
 
   const getKnowledge = useCallback(async (prompt: string): Promise<string | null> => {
     if (!apiKey) {
@@ -132,5 +155,6 @@ export const useAureaAPI = () => {
     sendMessage,
     getKnowledge,
     checkConnection,
+    wallet,
   };
 };

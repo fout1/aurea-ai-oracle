@@ -48,9 +48,12 @@ export interface TransactionData {
   toAddress: string;
 }
 
+// Updated solver type to include Aurea
+export type SolverType = "LI.FI" | "Enso" | "Brian" | "Lido" | "Bungee" | "Symbiosis" | "Avnu.fi" | "Aurea";
+
 // Transaction result definition
 export interface TransactionResult {
-  solver: "LI.FI" | "Enso" | "Brian" | "Lido" | "Bungee" | "Symbiosis" | "Avnu.fi";
+  solver: SolverType;
   action: string;
   type: "write" | "read";
   data: TransactionData;
@@ -76,7 +79,7 @@ export interface KnowledgeResult {
 
 // Message type for conversation history
 export interface ConversationMessage {
-  sender: "user" | "brian";
+  sender: "user" | "aurea";
   content: string;
 }
 
@@ -104,6 +107,14 @@ export interface Action {
   name: string;
   description: string;
   parameters: ActionParameter[];
+}
+
+// Wallet connection types
+export interface WalletInfo {
+  address: string;
+  chainId: number;
+  connector: string;
+  isConnected: boolean;
 }
 
 // API request/response types

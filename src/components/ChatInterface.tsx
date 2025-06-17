@@ -17,14 +17,14 @@ export const ChatInterface = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "1",
-      text: "Hello! I'm Aurea AI, your intelligent blockchain assistant. I can help you with transactions, smart contracts, DeFi protocols, and answer questions about blockchain technology. How can I help you today?",
+      text: "Hello! I'm Aurea AI, your intelligent blockchain assistant. I can help you with:\n\n🔄 **DeFi Operations**: Swaps, bridges, lending, staking\n📊 **Portfolio Management**: Track and optimize your assets\n⛓️ **Multi-Chain Support**: Ethereum, Polygon, Arbitrum, and more\n💡 **Smart Insights**: Market analysis and recommendations\n🛡️ **Security**: Transaction simulation and protection\n\nConnect your wallet and let's start building your DeFi strategy!",
       isUser: false,
       timestamp: new Date(),
     },
   ]);
   const [isTyping, setIsTyping] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const { sendMessage, isLoading, apiKey } = useAureaAPI();
+  const { sendMessage, isLoading, apiKey, wallet } = useAureaAPI();
 
   const scrollToBottom = () => {
     if (scrollAreaRef.current) {
@@ -43,7 +43,7 @@ export const ChatInterface = () => {
     return messages
       .filter(msg => msg.id !== "1") // Exclude welcome message
       .map(msg => ({
-        sender: msg.isUser ? "user" : "brian",
+        sender: msg.isUser ? "user" : "aurea",
         content: msg.text,
       }));
   };
@@ -65,7 +65,7 @@ export const ChatInterface = () => {
         setTimeout(() => {
           const aiResponse: ChatMessage = {
             id: (Date.now() + 1).toString(),
-            text: "Please configure your API key in the header to enable real AI functionality. I'm currently running in demo mode.",
+            text: "Please configure your API key in the header to enable real Aurea AI functionality. I'm currently running in demo mode with limited capabilities.",
             isUser: false,
             timestamp: new Date(),
           };
@@ -76,7 +76,12 @@ export const ChatInterface = () => {
       }
 
       const conversationHistory = buildConversationHistory();
-      const result = await sendMessage(text, undefined, undefined, conversationHistory);
+      const result = await sendMessage(
+        text, 
+        wallet?.address, 
+        wallet?.chainId?.toString(), 
+        conversationHistory
+      );
       
       if (result) {
         const aiResponse: ChatMessage = {
@@ -90,7 +95,7 @@ export const ChatInterface = () => {
         // Error fallback
         const errorResponse: ChatMessage = {
           id: (Date.now() + 1).toString(),
-          text: "I apologize, but I encountered an error processing your request. Please check your API key and try again.",
+          text: "I apologize, but I encountered an error processing your request. Please check your API key and wallet connection, then try again.",
           isUser: false,
           timestamp: new Date(),
         };
@@ -100,7 +105,7 @@ export const ChatInterface = () => {
       console.error('Error in handleSendMessage:', error);
       const errorResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        text: "I'm experiencing technical difficulties. Please try again later.",
+        text: "I'm experiencing technical difficulties. Please try again later or check your connection.",
         isUser: false,
         timestamp: new Date(),
       };
