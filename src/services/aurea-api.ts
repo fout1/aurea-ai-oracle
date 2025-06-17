@@ -133,10 +133,18 @@ class AureaAPIService {
   }
 
   async generateSmartContract(request: SmartContractRequest): Promise<SmartContractResult | ApiError> {
-    return this.makeRequest<SmartContractResult>('/api/v0/agent/smart-contract', {
+    const response = await this.makeRequest<SmartContractResult>('/api/v0/agent/smart-contract', {
       method: 'POST',
       body: JSON.stringify(request),
     });
+
+    if ('error' in response) {
+      return response;
+    }
+
+    // The API returns the SmartContractResult directly, not wrapped in a result property
+    // Based on the API spec, the response structure is { result: string, abi?: any, bytecode: string }
+    return response as SmartContractResult;
   }
 
   async speechToAction(request: SpeechRequest): Promise<ApiResponse<TransactionResult> | ApiError> {
