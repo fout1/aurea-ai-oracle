@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,18 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				aurea: {
+					50: '#fefbf0',
+					100: '#fef7e0',
+					200: '#fcecbd',
+					300: '#f9dd8a',
+					400: '#f5c94f',
+					500: '#f1b82d',
+					600: '#e09a1b',
+					700: '#bb7d17',
+					800: '#966318',
+					900: '#7c5317',
 				}
 			},
 			borderRadius: {
@@ -84,11 +97,31 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': { opacity: '0', transform: 'translateY(10px)' },
+					'100%': { opacity: '1', transform: 'translateY(0)' }
+				},
+				'typing': {
+					'0%': { width: '0' },
+					'100%': { width: '100%' }
+				},
+				'pulse-glow': {
+					'0%, 100%': { boxShadow: '0 0 20px rgba(241, 184, 45, 0.3)' },
+					'50%': { boxShadow: '0 0 30px rgba(241, 184, 45, 0.6)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.5s ease-out',
+				'typing': 'typing 3s steps(30, end)',
+				'pulse-glow': 'pulse-glow 2s ease-in-out infinite'
+			},
+			backgroundImage: {
+				'gradient-aurea': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+				'gradient-dark': 'linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 100%)',
+				'gradient-glass': 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)'
 			}
 		}
 	},
