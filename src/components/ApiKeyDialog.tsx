@@ -47,7 +47,7 @@ export const ApiKeyDialog: React.FC<ApiKeyDialogProps> = ({ onApiKeySet, hasApiK
         <DialogHeader>
           <DialogTitle className="text-white">Configure Aurea API Key</DialogTitle>
           <DialogDescription className="text-gray-300">
-            Enter your Brian API key to enable Aurea AI functionality.
+            Enter your Aurea API key to enable full AI functionality.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -58,13 +58,13 @@ export const ApiKeyDialog: React.FC<ApiKeyDialogProps> = ({ onApiKeySet, hasApiK
               type="password"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              placeholder="Enter your Brian API key..."
+              placeholder="Enter your Aurea API key..."
               className="bg-gray-800 border-gray-600 text-white placeholder-gray-400"
             />
           </div>
           <div className="flex items-center justify-between">
             <a
-              href="https://docs.brianknows.org/"
+              href="https://docs.aurea.ai/api-keys"
               target="_blank"
               rel="noopener noreferrer"
               className="text-aurea-400 hover:text-aurea-300 text-sm flex items-center"
