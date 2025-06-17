@@ -3,6 +3,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { Message } from "./Message";
 import { InputArea } from "./InputArea";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAureaAPI } from "@/hooks/useAureaAPI";
+import { ConversationMessage } from "@/types/aurea-api";
 
 interface ChatMessage {
   id: string;
@@ -15,13 +17,14 @@ export const ChatInterface = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "1",
-      text: "Hello! I'm Aurea AI, your intelligent assistant. How can I help you today?",
+      text: "Hello! I'm Aurea AI, your intelligent blockchain assistant. I can help you with transactions, smart contracts, DeFi protocols, and answer questions about blockchain technology. How can I help you today?",
       isUser: false,
       timestamp: new Date(),
     },
   ]);
   const [isTyping, setIsTyping] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { sendMessage, isLoading, apiKey } = useAureaAPI();
 
   const scrollToBottom = () => {
     if (scrollAreaRef.current) {
@@ -36,6 +39,15 @@ export const ChatInterface = () => {
     scrollToBottom();
   }, [messages, isTyping]);
 
+  const buildConversationHistory = (): ConversationMessage[] => {
+    return messages
+      .filter(msg => msg.id !== "1") // Exclude welcome message
+      .map(msg => ({
+        sender: msg.isUser ? "user" : "brian",
+        content: msg.text,
+      }));
+  };
+
   const handleSendMessage = async (text: string) => {
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -47,30 +59,55 @@ export const ChatInterface = () => {
     setMessages(prev => [...prev, userMessage]);
     setIsTyping(true);
 
-    // Simulate AI response delay
-    setTimeout(() => {
-      const aiResponse: ChatMessage = {
+    try {
+      if (!apiKey) {
+        // Fallback to local response if no API key
+        setTimeout(() => {
+          const aiResponse: ChatMessage = {
+            id: (Date.now() + 1).toString(),
+            text: "Please configure your API key in the header to enable real AI functionality. I'm currently running in demo mode.",
+            isUser: false,
+            timestamp: new Date(),
+          };
+          setMessages(prev => [...prev, aiResponse]);
+          setIsTyping(false);
+        }, 1000);
+        return;
+      }
+
+      const conversationHistory = buildConversationHistory();
+      const result = await sendMessage(text, undefined, undefined, conversationHistory);
+      
+      if (result) {
+        const aiResponse: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          text: result.response,
+          isUser: false,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, aiResponse]);
+      } else {
+        // Error fallback
+        const errorResponse: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          text: "I apologize, but I encountered an error processing your request. Please check your API key and try again.",
+          isUser: false,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, errorResponse]);
+      }
+    } catch (error) {
+      console.error('Error in handleSendMessage:', error);
+      const errorResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        text: generateAIResponse(text),
+        text: "I'm experiencing technical difficulties. Please try again later.",
         isUser: false,
         timestamp: new Date(),
       };
-
-      setMessages(prev => [...prev, aiResponse]);
+      setMessages(prev => [...prev, errorResponse]);
+    } finally {
       setIsTyping(false);
-    }, 1500 + Math.random() * 1000);
-  };
-
-  const generateAIResponse = (userMessage: string): string => {
-    const responses = [
-      "I understand your question. Let me help you with that. As Aurea AI, I'm designed to provide intelligent and helpful responses tailored to your needs.",
-      "That's an interesting point! Based on my analysis, I can offer several perspectives on this topic that might be valuable to you.",
-      "Thank you for asking! I've processed your request and here's what I think would be the most helpful approach for your situation.",
-      "Great question! Let me break this down for you with some insights that could be particularly useful in this context.",
-      "I appreciate you bringing this up. From my understanding, here are some key considerations that might help guide your thinking.",
-    ];
-
-    return responses[Math.floor(Math.random() * responses.length)];
+    }
   };
 
   return (
@@ -86,7 +123,7 @@ export const ChatInterface = () => {
                 timestamp={message.timestamp}
               />
             ))}
-            {isTyping && (
+            {(isTyping || isLoading) && (
               <div className="flex justify-start">
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-3 max-w-xs border border-white/20">
                   <div className="flex space-x-1">
@@ -100,7 +137,7 @@ export const ChatInterface = () => {
           </div>
         </ScrollArea>
       </div>
-      <InputArea onSendMessage={handleSendMessage} disabled={isTyping} />
+      <InputArea onSendMessage={handleSendMessage} disabled={isTyping || isLoading} />
     </div>
   );
 };
